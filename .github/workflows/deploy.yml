@@ -1,7 +1,8 @@
 # Builds the site and publishes it to GitHub Pages on every push to main.
 #
-# One-time setup: in the repo on GitHub, go to
-#   Settings → Pages → Build and deployment → Source: "GitHub Actions"
+# The deploy job also makes sure the repo's Pages setting is
+# "Source: GitHub Actions" (it flips it via the API if needed), so
+# there is no manual setup — pushing to main is all it takes.
 name: Deploy to GitHub Pages
 
 on:
@@ -34,6 +35,28 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # GitHub's default for a fresh repo is the legacy Jekyll pipeline,
+      # which can't build an Astro site. This flips the Pages source to
+      # "GitHub Actions" via the API; it's a no-op once already set.
+      - name: Ensure Pages deploys from GitHub Actions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pages_api() {
+            curl -s -o /tmp/pages-response.json -w "%{http_code}" -X "$1" \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/pages" \
+              ${2:+-d "$2"}
+          }
+          if [ "$(pages_api GET)" = "404" ]; then
+            code=$(pages_api POST '{"build_type":"workflow"}')
+          else
+            code=$(pages_api PUT '{"build_type":"workflow"}')
+          fi
+          echo "Pages configuration result: HTTP $code"
+          cat /tmp/pages-response.json 2>/dev/null || true
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
