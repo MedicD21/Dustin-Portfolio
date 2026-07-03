@@ -1,0 +1,60 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ProjectRow from '../../components/ProjectRow.astro';
+import GitHubRepos from '../../components/GitHubRepos.astro';
+import { SITE } from '../../site.config';
+
+const projects = (await getCollection('projects', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+---
+
+<Base title="Projects" description="Things I've built while learning software engineering.">
+  <section class="section">
+    <div class="page-head">
+      <h1>Projects</h1>
+      <p class="muted">
+        Things I've built — coursework, experiments, and whatever else
+        taught me something. Newest first.
+      </p>
+    </div>
+    <div class="project-list">
+      {projects.map((project) => <ProjectRow project={project} />)}
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="gh-label">
+    <h2 class="section-label" id="gh-label">Fresh from GitHub</h2>
+    <p class="gh-blurb muted">
+      Pulled live from
+      <a href={`https://github.com/${SITE.github}`} target="_blank" rel="noopener noreferrer">
+        @{SITE.github}</a
+      > — recently active repositories, straight from the source.
+    </p>
+    <GitHubRepos />
+  </section>
+</Base>
+
+<style>
+  .page-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-size: 1.55rem;
+  }
+
+  .page-head p {
+    font-size: 0.95rem;
+    max-width: 34rem;
+  }
+
+  .gh-blurb {
+    font-size: 0.88rem;
+    margin-top: -0.4rem;
+  }
+</style>

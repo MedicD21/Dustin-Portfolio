@@ -1,0 +1,115 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { url } from '../lib/url';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { title, description, date, tech, github, demo } = project.data;
+const hasWriteup = (project.body ?? '').trim().length > 0;
+const year = date.getFullYear();
+---
+
+<article class="project">
+  <div class="head">
+    <h3>
+      {hasWriteup ? (
+        <a href={url(`/projects/${project.id}`)} class="quiet">{title}</a>
+      ) : (
+        title
+      )}
+    </h3>
+    <span class="year mono muted">{year}</span>
+  </div>
+
+  <p class="desc muted">{description}</p>
+
+  <div class="meta">
+    {tech.length > 0 && (
+      <span class="tech mono muted">{tech.join(' · ')}</span>
+    )}
+    <span class="links">
+      {hasWriteup && (
+        <a href={url(`/projects/${project.id}`)} class="quiet mono">write-up →</a>
+      )}
+      {github && (
+        <a href={github} target="_blank" rel="noopener noreferrer" class="quiet mono">
+          github ↗
+        </a>
+      )}
+      {demo && (
+        <a href={demo} target="_blank" rel="noopener noreferrer" class="quiet mono">
+          live ↗
+        </a>
+      )}
+    </span>
+  </div>
+</article>
+
+<style>
+  .project {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding-block: 1.35rem;
+  }
+
+  .project + .project,
+  :global(.project-list) .project:first-child {
+    border-top: 1px solid var(--line);
+  }
+
+  .head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  h3 {
+    font-size: 1.02rem;
+  }
+
+  h3 a:hover {
+    color: var(--accent);
+  }
+
+  .year {
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .desc {
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    margin-top: 0.35rem;
+  }
+
+  .tech {
+    font-size: 0.75rem;
+  }
+
+  .links {
+    display: flex;
+    gap: 1.1rem;
+  }
+
+  .links a {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .links a:hover {
+    color: var(--accent);
+  }
+</style>

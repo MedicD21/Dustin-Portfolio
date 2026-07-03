@@ -1,0 +1,96 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const projects = await getCollection(
+    'projects',
+    ({ data, body }) => !data.draft && (body ?? '').trim().length > 0
+  );
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const { title, description, date, tech, github, demo } = project.data;
+const dateLabel = date.toLocaleDateString('en-US', {
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+---
+
+<Base title={title} description={description}>
+  <article class="section">
+    <header class="head">
+      <a href={url('/projects')} class="back quiet mono">← projects</a>
+      <h1>{title}</h1>
+      <p class="muted desc serif">{description}</p>
+      <div class="meta mono muted">
+        <span>{dateLabel}</span>
+        {tech.length > 0 && <span>{tech.join(' · ')}</span>}
+        {github && (
+          <a href={github} target="_blank" rel="noopener noreferrer" class="quiet">
+            github ↗
+          </a>
+        )}
+        {demo && (
+          <a href={demo} target="_blank" rel="noopener noreferrer" class="quiet">
+            live ↗
+          </a>
+        )}
+      </div>
+    </header>
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-bottom: 1.75rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .back {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .back:hover {
+    color: var(--accent);
+  }
+
+  h1 {
+    font-size: 1.65rem;
+  }
+
+  .desc {
+    font-size: 1.08rem;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.4rem;
+    font-size: 0.76rem;
+    margin-top: 0.4rem;
+  }
+
+  .meta a {
+    color: var(--text-muted);
+  }
+
+  .meta a:hover {
+    color: var(--accent);
+  }
+</style>

@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro';
+import { url } from '../lib/url';
+---
+
+<Base title="Not found">
+  <section class="lost">
+    <p class="code mono">404</p>
+    <h1>Nothing here <span class="serif">yet.</span></h1>
+    <p class="muted">
+      This page doesn't exist — or hasn't been built. Story of a
+      student's portfolio, honestly.
+    </p>
+    <a href={url('/')} class="quiet mono">← back home</a>
+  </section>
+</Base>
+
+<style>
+  .lost {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding-block: 3rem;
+  }
+
+  .code {
+    font-size: 0.8rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+  }
+
+  h1 {
+    font-size: 1.7rem;
+  }
+
+  .lost p.muted {
+    max-width: 30rem;
+  }
+
+  .lost a {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+  }
+
+  .lost a:hover {
+    color: var(--accent);
+  }
+</style>

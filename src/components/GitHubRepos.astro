@@ -1,0 +1,141 @@
+---
+import { SITE } from '../site.config';
+---
+
+<div
+  id="gh-repos"
+  data-user={SITE.github}
+  data-profile={`https://github.com/${SITE.github}`}
+>
+  <p class="status muted mono">fetching repos from github…</p>
+</div>
+
+<style>
+  #gh-repos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0.85rem;
+  }
+
+  .status {
+    font-size: 0.8rem;
+    grid-column: 1 / -1;
+  }
+
+  #gh-repos :global(.repo) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.95rem 1.05rem;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+
+  #gh-repos :global(.repo:hover) {
+    border-color: var(--line-strong);
+    transform: translateY(-2px);
+    color: inherit;
+  }
+
+  #gh-repos :global(.repo-name) {
+    font-family: var(--font-mono);
+    font-size: 0.83rem;
+    font-weight: 600;
+  }
+
+  #gh-repos :global(.repo:hover .repo-name) {
+    color: var(--accent);
+  }
+
+  #gh-repos :global(.repo-desc) {
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+    flex: 1;
+  }
+
+  #gh-repos :global(.repo-meta) {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+
+  #gh-repos :global(.lang-dot) {
+    display: inline-block;
+    width: 0.55em;
+    height: 0.55em;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-right: 0.45em;
+    vertical-align: baseline;
+  }
+</style>
+
+<script>
+  const container = document.getElementById('gh-repos');
+
+  async function loadRepos(el: HTMLElement) {
+    const user = el.dataset.user;
+    const profile = el.dataset.profile ?? '#';
+    const fallback = () => {
+      el.innerHTML = `<p class="status muted mono">couldn’t reach the GitHub API — <a href="${profile}">see everything on GitHub ↗</a></p>`;
+    };
+
+    try {
+      const res = await fetch(
+        `https://api.github.com/users/${user}/repos?sort=pushed&per_page=30`
+      );
+      if (!res.ok) return fallback();
+
+      const repos: any[] = await res.json();
+      const shown = repos
+        .filter((r) => !r.fork && !r.archived)
+        .slice(0, 6);
+      if (shown.length === 0) return fallback();
+
+      el.innerHTML = '';
+      for (const r of shown) {
+        const card = document.createElement('a');
+        card.className = 'repo';
+        card.href = r.html_url;
+        card.target = '_blank';
+        card.rel = 'noopener noreferrer';
+
+        const name = document.createElement('span');
+        name.className = 'repo-name';
+        name.textContent = r.name;
+
+        const desc = document.createElement('span');
+        desc.className = 'repo-desc';
+        desc.textContent = r.description ?? '';
+
+        const meta = document.createElement('span');
+        meta.className = 'repo-meta';
+        if (r.language) {
+          const lang = document.createElement('span');
+          lang.innerHTML = '<span class="lang-dot"></span>';
+          lang.append(r.language);
+          meta.append(lang);
+        }
+        if (r.stargazers_count > 0) {
+          const stars = document.createElement('span');
+          stars.textContent = `★ ${r.stargazers_count}`;
+          meta.append(stars);
+        }
+
+        card.append(name, desc, meta);
+        el.append(card);
+      }
+    } catch {
+      fallback();
+    }
+  }
+
+  if (container) loadRepos(container);
+</script>

@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import NoteRow from '../../components/NoteRow.astro';
+
+const notes = (await getCollection('notes', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+---
+
+<Base title="Notes" description="Short posts about what I'm learning.">
+  <section class="section">
+    <div class="page-head">
+      <h1>Notes</h1>
+      <p class="muted">
+        Short posts written while learning — part journal, part
+        documentation. Thinking out loud, in public.
+      </p>
+    </div>
+    <div>
+      {notes.map((note) => <NoteRow note={note} />)}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .page-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-size: 1.55rem;
+  }
+
+  .page-head p {
+    font-size: 0.95rem;
+    max-width: 34rem;
+  }
+</style>

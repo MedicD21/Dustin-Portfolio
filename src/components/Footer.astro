@@ -1,0 +1,50 @@
+---
+import { SITE } from '../site.config';
+import { url } from '../lib/url';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="wrap">
+  <div class="links">
+    {SITE.socials.map((s) => (
+      <a href={s.url} target="_blank" rel="noopener noreferrer" class="quiet mono">
+        {s.label.toLowerCase()}
+      </a>
+    ))}
+    <a href={`mailto:${SITE.email}`} class="quiet mono">email</a>
+    <a href={url('/rss.xml')} class="quiet mono">rss</a>
+  </div>
+  <p class="note muted">
+    © {year} {SITE.name} · {SITE.footerNote}
+  </p>
+</footer>
+
+<style>
+  footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    padding-block: 2.5rem 3.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.4rem;
+  }
+
+  .links a {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .links a:hover {
+    color: var(--accent);
+  }
+
+  .note {
+    font-size: 0.8rem;
+  }
+</style>
